@@ -228,19 +228,27 @@ def report(request):
     # Obtiene el número de visitas a los reportes de estadías
     views = register_view.objects.all()
     vistas_reportes = {}
+    concentrado_vistas = []
     for view in views:
         # Busqueda relación de reporte por id
         for reporte in reportes:
             if view.id_reporte == reporte.id:
+                data = {
+                    'Matricula': view.matricula,
+                    'Reporte': reporte.proyecto,
+                    'Carrera': reporte.carrera,
+                    'Fecha_cosul': view.fecha_consulta.strftime("%Y/%m/%d %H:%M:%S")
+                }
+                concentrado_vistas.append(data)
                 # Valida si ya existe la información en el arreglo
                 if reporte.proyecto in vistas_reportes:
                     # Obtiene el ultimo registro del contador agregado y le aumenta 1
-                    cont_ant = vistas_reportes[reporte.proyecto][reporte.carrera]
-                    vistas_reportes[reporte.proyecto] = {reporte.carrera: cont_ant + 1}
+                    cont_ant = vistas_reportes[reporte.proyecto][1]
+                    vistas_reportes[reporte.proyecto] = [reporte.carrera, cont_ant + 1]
                 else:
                     # Si no hay registro en el arreglo se crea uno nuevo iniciando en 1
-                    vistas_reportes[reporte.proyecto] = {reporte.carrera: 1}
-
+                    vistas_reportes[reporte.proyecto] = [reporte.carrera, 1]
+    
     data = {
         'ciclo': format[month] + ' ' + year,
         'cantidad_libro': cantidad_libro,
@@ -250,6 +258,7 @@ def report(request):
         'conteo_ejemplares': conteo_ejemplares,
         'conc_carreras': conc_carreras,
         'estadias_reportes': estadias_reportes,
-        'cont_vistas_reporte': vistas_reportes
+        'cont_vistas_reporte': vistas_reportes,
+        'concentrado_vistas': concentrado_vistas
     }
     return generate_report(data)
