@@ -1,22 +1,22 @@
 from django.shortcuts import render, redirect
-from static.utils import dd
 from almacen.models import acervo_model
 from estadias.models import register_view, model_estadias
-from sito.models import Persona, Usuario
+from sito.models import Persona, Usuario, Carrera
 from static.helpers import *
 from .report_xlsx import generate_report
 from catalogo.models import model_catalogo
 from datetime import datetime
 
 from collections import Counter
-import json
+import json, sys
 
 # Create your views here.
 def index_inicio(request):
     # Se asigna el código para el focus en el sidebar
     side_code = 100
 
-    if request.user.groups.filter(name='Administrador').exists():
+    # if request.user.groups.filter(name='Administrador').exists():
+    if request.user.groups.filter(name='Alumno').exists():
         # Se obtienen todos los datos del acervo
         datos = acervo_model.objects.all()
         # Se realiza el conteo de todos los libros
@@ -27,10 +27,10 @@ def index_inicio(request):
         total_state = get_states(datos)
         # Se realiza el recopilado del tipo de adquisición
         value_adqui = get_adqui(datos)
-        """ Registro de vista"""
+        # ==> Registro de vista
         ctrl_info = register_view.objects.order_by('-fecha_consulta')
         ctrl_view = ctrl_view_report(ctrl_info)
-        """ fin """
+        # ==> fin
 
         data = {
             "total_book": totals['total_book'],
@@ -51,7 +51,6 @@ def index_inicio(request):
             "side_code": side_code
         }
         return render(request, 'index_general.html', { "data": data })
-
 
 def cont_books(datos, type):
     total_book = 0
@@ -145,53 +144,112 @@ def ctrl_view_report(info):
     
     return data_all
 
-def format_month(m):
+def report(request):
+    # Arreglo para obtención nombre de mes
     format = {
-        "1": "ENERO",
-        "2": "FEBRERO",
-        "3": "MARZO",
-        "4": "ABRIL",
-        "5": "MAYO",
-        "6": "JUNIO",
-        "7": "JULIO",
-        "8": "AGOSTO",
-        "9": "SEPTIEMBRE",
+        "01": "ENERO",
+        "02": "FEBRERO",
+        "03": "MARZO",
+        "04": "ABRIL",
+        "05": "MAYO",
+        "06": "JUNIO",
+        "07": "JULIO",
+        "08": "AGOSTO",
+        "09": "SEPTIEMBRE",
         "10": "OCTUBRE",
         "11": "NOVIEMBRE",
         "12": "DICIEMBRE"
     }
-    return format[m]
-
-def report(request):
     date = datetime.now()
-    year_month = date.strftime('%m %Y')
-    cut = year_month.split(' ')
-   
+    year = date.strftime('%Y')
+    month = date.strftime('%m')
     # Obtiene información del acervo
     libros = acervo_model.objects.all()
-    # Modelo a comparar, grupos
-    modelo_grupo = [
-        'ADM', 'MET', 'PIA', 
-        'ERC', 'QUIM', 'TIS', 
-        'CBA', 'FSC', 'OCL', 
-        'OCLEC', 'OCEA', 'OCIG', 
-        'FCE', 'IDI', 'LYM',
-        'OC', 'Otros'
-    ]
-    conteo_grupo = {}
-    contador = []
+    cantidad_libro = {}
+    volumen_libro = {}
+    cantidad_disco = {}
+    volumen_disco = {}
+    conteo_ejemplares = []
+    for libro in libros:
+        formato = libro.formato
+        acortado = libro.colocacion.split(" ")
+        ejemplar = acortado[0]
+        # Recopila las abreviaciones de las colocación
+        conteo_ejemplares.append(ejemplar) if ejemplar not in conteo_ejemplares else ''
+        # Calcula los voluemes de los ejemplares
+        # Calcula la cantidad de ejemplares
+        if formato == 'Libro':
+            if len(volumen_libro) != 0:
+                if ejemplar in volumen_libro:
+                    # c_anterior = volumen_group[ejemplar]
+                    # suma = c_anterior + libro.cant
+                    volumen_libro[ejemplar] = volumen_libro[ejemplar] + libro.cant
+                    cantidad_libro[ejemplar] = cantidad_libro[ejemplar] + 1
+                else:
+                    volumen_libro[ejemplar] = libro.cant
+                    cantidad_libro[ejemplar] = 1
+            else:
+                volumen_libro[ejemplar] = libro.cant
+                cantidad_libro[ejemplar] = 1
+        if formato == 'Disco':
+            if len(volumen_disco) != 0:
+                if ejemplar in volumen_disco:
+                    # c_anterior = volumen_group[ejemplar]
+                    # suma = c_anterior + libro.cant
+                    volumen_disco[ejemplar] = volumen_disco[ejemplar] + libro.cant
+                    cantidad_disco[ejemplar] = cantidad_disco[ejemplar] + 1
+                else:
+                    volumen_disco[ejemplar] = libro.cant
+                    cantidad_disco[ejemplar] = 1
+            else:
+                volumen_disco[ejemplar] = libro.cant
+                cantidad_disco[ejemplar] = 1
     
-    for l in libros:
-        acortado = l.colocacion.split(" ")
-        contador.append(acortado[0])
+    # Obtiene información de los reportes de estadías
+    reportes = model_estadias.objects.all()
+    estadias_reportes = {}
+    conc_carreras = {}
+    contador = 1
+    for reporte in reportes:
+        if reporte.carrera not in estadias_reportes:
+            estadias_reportes[reporte.carrera] = 1
+        else:
+            estadias_reportes[reporte.carrera] = contador
+        contador += 1
 
-    conteo = Counter(contador)
-    # Crear un diccionario solo con los elementos de modelo_grupo
-    cant_for_grp = {grupo: conteo[grupo] for grupo in modelo_grupo}
+    # Obtiene todas las carreras activas
+    carreras = Carrera.objects.all()
+    for carrera in carreras:
+        # Evita que se agregen duplicados
+        if carrera.abreviatura not in conc_carreras:
+            # Valida que este 
+            if carrera.activo:
+                conc_carreras[carrera.abreviatura] = carrera.nombre
+    # Obtiene el número de visitas a los reportes de estadías
+    views = register_view.objects.all()
+    vistas_reportes = {}
+    for view in views:
+        # Busqueda relación de reporte por id
+        for reporte in reportes:
+            if view.id_reporte == reporte.id:
+                # Valida si ya existe la información en el arreglo
+                if reporte.proyecto in vistas_reportes:
+                    # Obtiene el ultimo registro del contador agregado y le aumenta 1
+                    cont_ant = vistas_reportes[reporte.proyecto][reporte.carrera]
+                    vistas_reportes[reporte.proyecto] = {reporte.carrera: cont_ant + 1}
+                else:
+                    # Si no hay registro en el arreglo se crea uno nuevo iniciando en 1
+                    vistas_reportes[reporte.proyecto] = {reporte.carrera: 1}
 
     data = {
-        "ciclo": format_month(cut[0]) + ' ' + cut[1],
-        "cant_for_grp": cant_for_grp
+        'ciclo': format[month] + ' ' + year,
+        'cantidad_libro': cantidad_libro,
+        'volumenes_por_libro': volumen_libro,
+        'cantidad_disco': cantidad_disco,
+        'volumenes_por_disco': volumen_disco,
+        'conteo_ejemplares': conteo_ejemplares,
+        'conc_carreras': conc_carreras,
+        'estadias_reportes': estadias_reportes,
+        'cont_vistas_reporte': vistas_reportes
     }
-
     return generate_report(data)

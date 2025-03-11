@@ -19,7 +19,7 @@ def catalago_View(request):
     return render(request, 'index_catalogo.html', {"side_code": side_code, "listado":listado, "form":form, "data_prestamo": data_prestamo})
 
 # Genera la vista para la tabla de prestamos
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def prestamos_View(request):
     side_code = 401
     listado = model_catalogo.objects.all()
@@ -236,7 +236,7 @@ def view_book(request, base64):
         return redirect('catalago_View')
 
 # Carga la vista con la información del acervo
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def cargar_portada(request):
     side_code = 402
     form = catalogo_form()
@@ -338,7 +338,7 @@ def book_delivered(request, cve, entrega):
             # Se guardan los cambios en la tabla del catalago
             book.save()
 
-            messages.add_message(request, messages.SUCCESS, 'Estado del prestamo cambiado')
+            messages.add_message(request, messages.SUCCESS, 'Estado del prestamo modificado')
             return redirect('prestamos_View')
         else:
             messages.add_message(request, messages.ERROR, '¡Algo salio mal!.')

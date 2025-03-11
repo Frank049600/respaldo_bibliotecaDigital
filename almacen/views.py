@@ -11,14 +11,14 @@ from static.helpers import *
 from django.utils.timezone import now
 
 # Create your views here.
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def index_acervo(request):
         side_code = 200
         listado = acervo_model.objects.all()
         form = registro_form()
         return render(request, 'index_almacen.html', { "list_acervo": listado, "form":form, "side_code":side_code})
 
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def acervo_registro(request):
     if request.method == 'POST':
         form = registro_form(request.POST)
