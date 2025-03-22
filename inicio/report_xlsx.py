@@ -99,10 +99,8 @@ def table_acervo(sheet, data):
         sheet[f"{c}13"].fill = PatternFill('solid', start_color="a0aab9")
         sheet[f"{c}13"].font = Font(color = '000000', bold=True, size=12)
     # Unión de celdas
-    sheet.merge_cells('A11:D11')
-    sheet.merge_cells('E11:F11')
-    sheet['A11'] = 'REPORTE GENERAL DE ACERVO BIBLIOGRÁFICO:'
-    sheet['E11'] = data['ciclo']
+    sheet.merge_cells('A11:F11')
+    sheet['A11'] = 'REPORTE GENERAL DE ACERVO BIBLIOGRÁFICO: ' + data['ciclo']
 
     # Crea encabezados de la tabla
     sheet['A12'].alignment = centrado
@@ -237,8 +235,7 @@ def table_acervo(sheet, data):
     # ==> Tabla para adquisiciones acervo
     new_cell = cont_cell + 2
     # Unión de celdas
-    sheet.merge_cells(f"A{new_cell}:D{new_cell}")
-    sheet.merge_cells(f"E{new_cell}:F{new_cell}")
+    sheet.merge_cells(f"A{new_cell}:F{new_cell}")
     # Da formato a las cabeceras
     for celda in celdas:
         sheet[f"{celda}{new_cell}"].fill = PatternFill('solid', start_color="0060df")
@@ -254,8 +251,7 @@ def table_acervo(sheet, data):
         sheet[f"{celda}{new_cell + 2}"].border = get_borders('all')
         sheet[f"{celda}{new_cell + 2}"].alignment = centrado
     # Agrega titulos
-    sheet[f"A{new_cell}"] = "ADQUISICIÓN DE ACERVO BIBLIOGRAFICO MES DE: "
-    sheet[f"E{new_cell}"] = data['ciclo']
+    sheet[f"A{new_cell}"] = "ADQUISICIÓN DE ACERVO BIBLIOGRAFICO MES DE: " + data['ciclo']
      # Crea encabezados de la tabla
      # Titulo 1
     sheet[f"A{new_cell + 1}"].alignment = centrado
@@ -274,14 +270,83 @@ def table_acervo(sheet, data):
     sheet[f"C{new_cell + 1}"] = "LIBROS"
     # Titulo 3.1
     sheet[f"C{new_cell + 2}"] = "NO.TÍTULOS"
-    sheet[f"D{new_cell + 2}"] = "NO.VOLUMNES"
+    sheet[f"D{new_cell + 2}"] = "NO.VOLUMENES"
     # Titulo 4
     sheet.merge_cells(f"E{new_cell + 1}:F{new_cell + 1}")
     sheet[f"E{new_cell + 1}"] = "CD-ROM"    
     # Titulo 4.1
     sheet[f"E{new_cell + 2}"] = "NO.TÍTULOS"
-    sheet[f"F{new_cell + 2}"] = "NO.VOLUMNES"
+    sheet[f"F{new_cell + 2}"] = "NO.VOLUMENES"
+    # Se procesa la información
+    contador = 1
+    data_cell = new_cell + 3
+    totalizador_lib1 = 0
+    totalizador_lib2 = 0
+    totalizador_disc1 = 0
+    totalizador_disc2 = 0
+    dato_concentrado_cant = {}
+    # Coloca nombre
+    for area_c in data['conteo_ejemplares']:
+        sheet[f"A{data_cell}"] = contador
+        sheet[f"A{data_cell}"].alignment = centrado
+        sheet[f"B{data_cell}"] = area_c
+        sheet[f"B{data_cell}"].alignment = centrado
+        vol_libros = data['adquisiciones']['volumen_libros'] if len(data['adquisiciones']['volumen_libros']) != 0 else 0
+        cant_libros = data['adquisiciones']['cantidad_libros'] if len(data['adquisiciones']['cantidad_libros']) != 0 else 0
+        vol_discos = data['adquisiciones']['volumen_discos'] if len(data['adquisiciones']['volumen_discos']) != 0 else 0
+        cant_discos = data['adquisiciones']['cantidad_discos'] if len(data['adquisiciones']['cantidad_discos']) != 0 else 0
+        # Libros
+        if vol_libros != 0:
+            dato_t = cant_libros.get(area_c) if cant_libros.get(area_c) != None else 0
+            sheet[f"C{data_cell}"] = dato_t
+            dato_v = vol_libros.get(area_c) if vol_libros.get(area_c) != None else 0
+            sheet[f"D{data_cell}"] = dato_v
+            # Totalizadores
+            totalizador_lib1 += dato_v
+            totalizador_lib2 += dato_t
+        else:
+            sheet[f"C{data_cell}"] = 0
+            sheet[f"D{data_cell}"] = 0
 
+        sheet[f"C{data_cell}"].alignment = centrado
+        sheet[f"D{data_cell}"].alignment = centrado
+        # Discos
+        if vol_discos != 0:
+            dato_t = cant_discos.get(area_c) if cant_discos.get(area_c) != None else 0
+            sheet[f"E{data_cell}"] = dato_t
+            dato_v = vol_discos.get(area_c) if vol_discos.get(area_c) != None else 0
+            sheet[f"F{data_cell}"] = dato_v
+            # Totalizadores
+            totalizador_disc1 += dato_v
+            totalizador_disc2 += dato_t
+        else:
+            sheet[f"E{data_cell}"] = 0
+            sheet[f"F{data_cell}"] = 0
+        
+        sheet[f"E{data_cell}"].alignment = centrado
+        sheet[f"F{data_cell}"].alignment = centrado
+        contador += 1
+        data_cell += 1
+
+    # Sección de totalizadores
+
+    for celda in celdas:
+        # Color y estilo a la fila
+        sheet[f"{celda}{data_cell}"].fill = PatternFill('solid', start_color="a0aab9")
+        sheet[f"{celda}{data_cell}"].font = Font(color = '000000', bold=True, size=12)
+        sheet[f"{celda}{data_cell}"].border = get_borders('all')
+        sheet[f"{celda}{data_cell}"].alignment = centrado
+
+    sheet[f"A{data_cell}"] = 'Total'
+    # Totalizador ejemplares libro
+    sheet[f"C{data_cell}"] = totalizador_lib2
+    # Totalizador volumenes libro
+    sheet[f"D{data_cell}"] = totalizador_lib1
+    # Totalizador ejemplares disco
+    sheet[f"E{data_cell}"] = totalizador_disc2
+    # Totalizador volumenes disco
+    sheet[f"F{data_cell}"] = totalizador_disc1
+        
 
 def table_reporte_estadias(sheet, data):
     """Función para la creación de la tabla de reportes de estadías
@@ -298,14 +363,14 @@ def table_reporte_estadias(sheet, data):
         sheet[f"{c}11"].fill = PatternFill('solid', start_color="0060df")
         sheet[f"{c}11"].font = Font(color = 'ffffff', bold=True, size=12)
         sheet[f"{c}11"].border = get_borders('all')
+        sheet[f"{c}11"].alignment = centrado
         sheet[f"{c}12"].fill = PatternFill('solid', start_color="a0aab9")
         sheet[f"{c}12"].font = Font(color = '000000', bold=True, size=12)
         sheet[f"{c}12"].border = get_borders('all')
         sheet[f"{c}12"].alignment = centrado
     # Unión de celdas
-    sheet.merge_cells('A11:C11')
-    sheet['A11'] = 'REPORTE GENERAL DOCUEMTOS DE ESTADÍAS:'
-    sheet['E11'] = data['ciclo']
+    sheet.merge_cells('A11:E11')
+    sheet['A11'] = 'REPORTE GENERAL DOCUMENTOS DE ESTADÍA: ' + data['ciclo']
     # Ajuste de ancho de celda
     sheet.column_dimensions['C'].width = 70
     # Crea encabezados de la tabla
@@ -399,11 +464,9 @@ def table_reporte_estadias(sheet, data):
         sheet[f"{c}{new_cell}"].border = get_borders('all')
         sheet[f"{c}{new_cell}"].alignment = centrado
 
-    sheet.merge_cells(f"A{new_cell - 1}:C{new_cell - 1}")
-    sheet[f"A{new_cell - 1}"] = 'REPORTE DE VISTAS POR PROYECTO:'
+    sheet.merge_cells(f"A{new_cell - 1}:D{new_cell - 1}")
+    sheet[f"A{new_cell - 1}"] = 'REPORTE DE VISTAS POR PROYECTO: ' + data['ciclo']
     sheet[f"A{new_cell - 1}"].alignment = centrado
-    sheet[f"D{new_cell - 1}"] = data['ciclo']
-    sheet[f"D{new_cell - 1}"].alignment = centrado
     # Aumenta el ancho de la fila
     sheet.row_dimensions[new_cell].height = 25
     # Header para numeración

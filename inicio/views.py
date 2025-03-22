@@ -6,9 +6,7 @@ from static.helpers import *
 from .report_xlsx import generate_report
 from catalogo.models import model_catalogo
 from datetime import datetime
-
-from collections import Counter
-import json, sys
+import calendar
 
 # Create your views here.
 def index_inicio(request):
@@ -204,7 +202,60 @@ def report(request):
             else:
                 volumen_disco[ejemplar] = libro.cant
                 cantidad_disco[ejemplar] = 1
-    
+    # Calcula adquisiciones por fecha
+    # fecha_inicio = datetime.date()
+    # print(fecha_inicio)
+    # registros_filtrados = list(filter(lambda r: fecha_inicio <= datetime.strptime(r["fecha"], "%Y-%m-%d") <= fecha_fin, libros))
+    # return False
+    # Manejor de adquisiciones de ejemplares
+    # Obtiene el número del mes anterior
+    # Obtiene todas las carreras activas
+    carreras = Carrera.objects.all()
+    calc = int(month) - 1
+    _, num_days = calendar.monthrange(int(year), int(calc))
+    # Se le formatea a 2 número si es necesario
+    calc_mes = f"0{calc}" if len(str(calc)) == 1 else calc
+    fech_ini = f"{year}-{calc_mes}-01"
+    fech_fin = f"{year}-{calc_mes}-{num_days}"
+    # fech_ini = '2024-12-01'
+    # fech_fin = '2024-12-30'
+    # fech_ini = '2025-03-01'
+    # fech_fin = '2025-03-30'
+    conc_adquisicion = {}
+    conc_adquisicion['fecha_inicial'] = fech_ini
+    conc_adquisicion['fecha_final'] = fech_fin
+    concentrado = []
+    adquisiciones = {}
+    adqui_vol_libro = {}
+    adqui_cant_libro = {}
+    adqui_vol_disco = {}
+    adqui_cant_disco = {}
+    for carrera in conteo_ejemplares:
+        for libro in libros:
+            if str(libro.fecharegistro) >= fech_ini and str(libro.fecharegistro) <= fech_fin:
+                # Existe coincidencia con la carrer y la colocación
+                if carrera in libro.colocacion:
+                    # Se separa por formato
+                    if libro.formato == 'Libro':
+                        if carrera in adqui_cant_libro:
+                            adqui_vol_libro[carrera] = adqui_vol_libro[carrera] + libro.cant
+                            adqui_cant_libro[carrera] = adqui_cant_libro[carrera] + 1
+                        else: 
+                            adqui_vol_libro[carrera] = libro.cant
+                            adqui_cant_libro[carrera] = 1
+                    if libro.formato == 'Disco':
+                        if carrera in adqui_cant_disco:
+                            adqui_vol_disco[carrera] = adqui_vol_disco[carrera] + libro.cant
+                            adqui_cant_disco[carrera] = adqui_cant_disco[carrera] + 1
+                        else: 
+                            adqui_vol_disco[carrera] = libro.cant
+                            adqui_cant_disco[carrera] = 1
+    adquisiciones = {
+        "volumen_libros": adqui_vol_libro,
+        "cantidad_libros": adqui_cant_libro,
+        "volumen_discos": adqui_vol_disco,
+        "cantidad_discos": adqui_cant_disco
+    }
     # Obtiene información de los reportes de estadías
     reportes = model_estadias.objects.all()
     estadias_reportes = {}
@@ -248,7 +299,7 @@ def report(request):
                 else:
                     # Si no hay registro en el arreglo se crea uno nuevo iniciando en 1
                     vistas_reportes[reporte.proyecto] = [reporte.carrera, 1]
-    
+
     data = {
         'ciclo': format[month] + ' ' + year,
         'cantidad_libro': cantidad_libro,
@@ -259,6 +310,8 @@ def report(request):
         'conc_carreras': conc_carreras,
         'estadias_reportes': estadias_reportes,
         'cont_vistas_reporte': vistas_reportes,
-        'concentrado_vistas': concentrado_vistas
+        'concentrado_vistas': concentrado_vistas,
+        'conc_adquisicion': conc_adquisicion,
+        "adquisiciones": adquisiciones
     }
     return generate_report(data)

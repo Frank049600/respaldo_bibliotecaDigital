@@ -74,14 +74,14 @@ def delete_acervo(request, col):
         messages.success(request, 'Registro Eliminado')
         return redirect(to="acervo")
 
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def edit_register(request, col):
       register = acervo_model.objects.filter(colocacion=col).first()
       listado = acervo_model.objects.all()
       return redirect(reverse('acervo')+'?'+{"register":register})
       # return redirect(request, 'index_almacen.html', { "id_edit": register, "list_acervo": listado})
 
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def edit_acervo(request):
     if request.method == 'POST':
         form = registro_form(request.POST)
