@@ -69,11 +69,21 @@ def cont_books(datos, type):
         }
     if type == 'p':
         prestamos = model_catalogo.objects.all()
+        date = datetime.now()
+        year = date.strftime('%Y')
+        month = date.strftime('%m')
+        # Define mes de consulta
+        _, num_days = calendar.monthrange(int(year), int(month))
+        fech_ini = f"{year}-{month}-01"
+        fech_fin = f"{year}-{month}-{num_days}"
         conteo_m = 0
         conteo_i = 0
         for p in prestamos:
             conteo_m += p.cantidad_m
-            conteo_i += p.cantidad_i
+            expl = str(p.fechaP).split(' ')
+            print(expl[0])
+            if expl[0] >= fech_ini and expl[0] <= fech_fin:
+                conteo_i += p.cantidad_i
             # total_book += 1
         totals = { 
             "book_movimiento": conteo_m,
@@ -142,7 +152,7 @@ def ctrl_view_report(info):
     
     return data_all
 
-def report(request):
+def report(request, periodo):
     # Arreglo para obtención nombre de mes
     format = {
         "01": "ENERO",
@@ -161,6 +171,14 @@ def report(request):
     date = datetime.now()
     year = date.strftime('%Y')
     month = date.strftime('%m')
+    # Define mes de consulta
+    resta = 1 if periodo == 1 else 0
+    calc = int(month) - resta
+    _, num_days = calendar.monthrange(int(year), int(calc))
+    if len(str(calc)) == 1:
+        ciclo = format[f"0{calc}"]
+    else:
+        ciclo = format[calc]
     # Obtiene información del acervo
     libros = acervo_model.objects.all()
     cantidad_libro = {}
@@ -211,16 +229,10 @@ def report(request):
     # Obtiene el número del mes anterior
     # Obtiene todas las carreras activas
     carreras = Carrera.objects.all()
-    calc = int(month) - 1
-    _, num_days = calendar.monthrange(int(year), int(calc))
     # Se le formatea a 2 número si es necesario
     calc_mes = f"0{calc}" if len(str(calc)) == 1 else calc
     fech_ini = f"{year}-{calc_mes}-01"
     fech_fin = f"{year}-{calc_mes}-{num_days}"
-    # fech_ini = '2024-12-01'
-    # fech_fin = '2024-12-30'
-    # fech_ini = '2025-03-01'
-    # fech_fin = '2025-03-30'
     conc_adquisicion = {}
     conc_adquisicion['fecha_inicial'] = fech_ini
     conc_adquisicion['fecha_final'] = fech_fin
@@ -300,8 +312,56 @@ def report(request):
                     # Si no hay registro en el arreglo se crea uno nuevo iniciando en 1
                     vistas_reportes[reporte.proyecto] = [reporte.carrera, 1]
 
+    # Se obtiene información de los prestamos
+    prestamos = model_catalogo.objects.all()
+    # fech_ini = '2024-12-01'
+    # fech_fin = '2024-12-30'
+    prestados_int = {}
+    prestados_ext = {}
+    noDevueltos_int = {}
+    noDevueltos_ext = {}
+    for carrera in conteo_ejemplares:
+        for prestamo in prestamos:
+            if str(prestamo.fechaP) >= fech_ini and str(prestamo.fechaP) <= fech_fin:
+                # Libros prestados
+                if carrera in prestamo.colocacion:
+                    if prestamo.tipoP == 'Interno':
+                        if carrera in prestados_int:
+                            # Obtiene dato anterior de prestamos
+                            cant_ant = prestados_int[carrera]
+                            # Obtiene dato anterior de no devueltos
+                            cant_ant_nd = noDevueltos_int[carrera]
+                            prestados_int[carrera] = cant_ant + prestamo.cantidad_i
+                            noDevueltos_int[carrera] = cant_ant_nd + prestamo.cantidad_m
+                        else:
+                            # Se agrega dato en prestados
+                            prestados_int[carrera] = prestamo.cantidad_i
+                            # Se agrega datos en no devueltos
+                            noDevueltos_int[carrera] = prestamo.cantidad_m
+                    elif prestamo.tipoP == 'Externo':
+                        if carrera in prestados_ext:
+                            # Obtiene dato anterior de prestamos
+                            cant_ant = prestados_ext[carrera]
+                            # Obtiene dato anterior de no devueltos
+                            cant_ant_nd = noDevueltos_ext[carrera]
+                            # Agrega nuevos valores
+                            prestados_ext[carrera] = cant_ant + prestamo.cantidad_i
+                            noDevueltos_ext[carrera] = cant_ant_nd + prestamo.cantidad_m
+
+                        else:
+                            prestados_ext[carrera] = prestamo.cantidad_i
+                            noDevueltos_ext[carrera] = prestamo.cantidad_m
+            
+
+    prestamo_conc = {
+        "prestados_int": prestados_int,
+        "prestados_ext": prestados_ext,
+        "noDevueltos_int": noDevueltos_int,
+        "noDevueltos_ext": noDevueltos_ext
+    }
+
     data = {
-        'ciclo': format[month] + ' ' + year,
+        'ciclo': ciclo,
         'cantidad_libro': cantidad_libro,
         'volumenes_por_libro': volumen_libro,
         'cantidad_disco': cantidad_disco,
@@ -312,6 +372,7 @@ def report(request):
         'cont_vistas_reporte': vistas_reportes,
         'concentrado_vistas': concentrado_vistas,
         'conc_adquisicion': conc_adquisicion,
-        "adquisiciones": adquisiciones
+        "adquisiciones": adquisiciones,
+        "prestamo_conc": prestamo_conc
     }
     return generate_report(data)

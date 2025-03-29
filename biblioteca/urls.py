@@ -52,7 +52,7 @@ urlpatterns = [
     path('get_book_for_person/', login_required(get_book_for_person), name='get_book_for_person'),
     path('get_personas_p/', login_required(get_personas_p), name='get_personas_p'),
     # Generación de reporte xlsx
-    path('report/', login_required(report), name='report'),
+    path('report/<int:periodo>', login_required(report), name='report'),
 ]
 
 urlpatterns += [

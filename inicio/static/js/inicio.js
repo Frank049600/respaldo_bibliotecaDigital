@@ -246,8 +246,8 @@ function reportMensual() {
     Swal.fire({
         "title": '¿Descargar reporte?',
         "icon": 'question',
-        // "input": "select",
-        // "inputOptions": inputOptions,
+        "input": "select",
+        "inputOptions": inputOptions,
         "showCancelButton": true,
         "cancelButtonText": "Cancelar",
         "confirmButtonText": "Confirmar",
@@ -256,7 +256,8 @@ function reportMensual() {
     }).then(function (result) {
         if (result.isConfirmed) {
             // Envía la colocación del registro a eliminar
-            location.href = '/report/'
+            // location.href = '/report/'
+            location.href = '/report/' + result.value
         }
     })
 }

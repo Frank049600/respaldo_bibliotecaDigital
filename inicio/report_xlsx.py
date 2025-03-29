@@ -347,7 +347,6 @@ def table_acervo(sheet, data):
     # Totalizador volumenes disco
     sheet[f"F{data_cell}"] = totalizador_disc1
         
-
 def table_reporte_estadias(sheet, data):
     """Función para la creación de la tabla de reportes de estadías
 
@@ -510,8 +509,150 @@ def table_reporte_estadias(sheet, data):
         sheet[f"{c}{celda + 1}"].border = get_borders('all')
         sheet[f"{c}{celda + 1}"].alignment = centrado
 
-
+def table_prestamos(sheet, data):
+        # configuraciones reusables reusables
+    centrado = Alignment(horizontal='center', vertical='center')
+    # Agrega caracteristicas grupales
+    celdas = ['A', 'B', 'C', 'D', 'E', 'F']
+    for c in celdas:
+        sheet[f"{c}11"].fill = PatternFill('solid', start_color="0060df")
+        sheet[f"{c}11"].font = Font(color = 'ffffff', bold=True, size=12)
+        sheet[f"{c}11"].border = get_borders('all')
+        sheet[f"{c}11"].alignment = centrado
+        sheet[f"{c}12"].fill = PatternFill('solid', start_color="a0aab9")
+        sheet[f"{c}12"].font = Font(color = '000000', bold=True, size=12)
+        sheet[f"{c}12"].border = get_borders('all')
+        sheet[f"{c}12"].alignment = centrado
+        sheet[f"{c}13"].fill = PatternFill('solid', start_color="a0aab9")
+        sheet[f"{c}13"].font = Font(color = '000000', bold=True, size=12)
+        sheet[f"{c}13"].border = get_borders('all')
+        sheet[f"{c}13"].alignment = centrado
+    # Unión de celdas
+    sheet.merge_cells('A11:F11')
+    sheet['A11'] = 'REPORTE DE PRESTAMOS: ' + data['ciclo']
+    # Ajuste de ancho de celda
+   # Crea encabezados de la tabla
+    sheet['A12'].alignment = centrado
+    sheet.merge_cells('A12:A13')
+    sheet['A12'].border = get_borders('top')
+    sheet['A13'].border = get_borders('bottom')
+    sheet['A12'] = "No."
     
+    # Agranda el tamaño de la celda A
+    sheet.column_dimensions['A'].width = 10
+    # Agranda el tamaño de la celda B
+    sheet.column_dimensions['B'].width = 25
+    sheet.merge_cells('B12:B13')
+    sheet['B12'].border = get_borders('all')
+    sheet['B13'].border = get_borders('all')
+    sheet['B12'] = 'ÁREA DE CONOCIMIENTO'
+    sheet['B12'].alignment = centrado
+
+    # ==> Se agregan titulos y volumenes de libros <==
+    # Agranda el tamaño de la celda D
+    sheet.column_dimensions['C'].width = 15
+    sheet.column_dimensions['D'].width = 20
+    sheet.column_dimensions['E'].width = 15
+    sheet.column_dimensions['F'].width = 20
+    # Unión de celdas
+    sheet.merge_cells('C12:D12')
+    sheet.merge_cells('E12:F12')
+    # Sección prestamo interno
+    sheet['C12'].border = get_borders('left')
+    sheet['D12'].border = get_borders('right')
+    sheet['C12'] = 'INTERNO'
+    sheet['C12'].alignment = centrado
+    sheet['C13'].border = get_borders('all')
+    sheet['C13'] = 'PRESTADOS'
+    sheet['C13'].alignment = centrado
+    sheet['D13'].border = get_borders('all')
+    sheet['D13'] = 'NO DEVUELTOS'
+    sheet['D13'].alignment = centrado
+    # Sección prestamo externo
+    sheet['E12'].border = get_borders('left')
+    sheet['F12'].border = get_borders('right')
+    sheet['E12'] = 'EXTERNO'
+    sheet['E12'].alignment = centrado
+    sheet['E13'].border = get_borders('all')
+    sheet['E13'] = 'PRESTADOS'
+    sheet['E13'].alignment = centrado
+    sheet['F13'].border = get_borders('all')
+    sheet['F13'] = 'NO DEVUELTOS'
+    sheet['F13'].alignment = centrado
+
+    # Se agrega información
+    # Se asignan las llaves de los grupo a las celdas
+    cont_cell = 14
+    tot_prestamo_int = 0
+    tot_noDevuelto_int = 0
+    tot_prestamo_ext = 0
+    tot_noDevuelto_ext = 0
+    cont_id = 1
+    for key in data['conteo_ejemplares']:
+        sheet[f"A{cont_cell}"] = cont_id
+        sheet[f"A{cont_cell}"].alignment = centrado
+        sheet[f"B{cont_cell}"] = key
+        sheet[f"B{cont_cell}"].alignment = centrado
+        # Agregan prestamos internos
+        if len(data['prestamo_conc']['prestados_int']) != 0:
+            for inter in data['prestamo_conc']['prestados_int']:
+                if key in inter:
+                    sheet[f"C{cont_cell}"] = data['prestamo_conc']['prestados_int'][inter]
+                    tot_prestamo_int += data['prestamo_conc']['prestados_int'][inter]
+                else:
+                    sheet[f"C{cont_cell}"] = 0
+        else:
+            sheet[f"C{cont_cell}"] = 0
+        sheet[f"C{cont_cell}"].alignment = centrado
+
+        if len(data['prestamo_conc']['noDevueltos_int']) != 0:
+            for inter in data['prestamo_conc']['noDevueltos_int']:
+                if key in inter:
+                    sheet[f"D{cont_cell}"] = data['prestamo_conc']['noDevueltos_int'][inter]
+                    tot_noDevuelto_int += data['prestamo_conc']['noDevueltos_int'][inter]
+                else:
+                    sheet[f"D{cont_cell}"] = 0
+        else:
+            sheet[f"D{cont_cell}"] = 0
+        sheet[f"D{cont_cell}"].alignment = centrado
+
+        if len(data['prestamo_conc']['prestados_ext']) != 0:
+            for inter in data['prestamo_conc']['prestados_ext']:
+                if key in inter:
+                    sheet[f"E{cont_cell}"] = data['prestamo_conc']['prestados_ext'][inter]
+                    tot_prestamo_ext += data['prestamo_conc']['prestados_ext'][inter]
+                else:
+                    sheet[f"E{cont_cell}"] = 0
+        else:
+            sheet[f"E{cont_cell}"] = 0
+        sheet[f"E{cont_cell}"].alignment = centrado
+
+        if len(data['prestamo_conc']['noDevueltos_ext']) != 0:
+            for inter in data['prestamo_conc']['noDevueltos_ext']:
+                if key in inter:
+                    sheet[f"F{cont_cell}"] = data['prestamo_conc']['noDevueltos_ext'][inter]
+                    tot_noDevuelto_ext += data['prestamo_conc']['noDevueltos_ext'][inter]
+                else:
+                    sheet[f"F{cont_cell}"] = 0
+        else:
+            sheet[f"F{cont_cell}"] = 0
+        sheet[f"F{cont_cell}"].alignment = centrado
+
+        cont_cell += 1
+        cont_id += 1
+    for celda in celdas:
+        sheet[f"{celda}{cont_cell}"].fill = PatternFill('solid', start_color="a0aab9")
+        sheet[f"{celda}{cont_cell}"].font = Font(color = '000000', bold=True, size=12)
+        sheet[f"{celda}{cont_cell}"].border = get_borders('all')
+        sheet[f"{celda}{cont_cell}"].alignment = centrado
+
+    sheet[f"A{cont_cell}"] = 'Total'
+    sheet[f"C{cont_cell}"] = tot_prestamo_int
+    sheet[f"D{cont_cell}"] = tot_noDevuelto_int
+    sheet[f"E{cont_cell}"] = tot_prestamo_ext
+    sheet[f"F{cont_cell}"] = tot_noDevuelto_ext
+
+
 def create_excel(data):
     """Crea un archivo Excel con una imagen de encabezado.
 
@@ -534,6 +675,10 @@ def create_excel(data):
     estadias = book.create_sheet(title="Estadías")
     insert_header_image(estadias)
     table_reporte_estadias(estadias, data)
+    # Tablas de prestamos
+    prestamos = book.create_sheet(title="Prestamos")
+    insert_header_image(prestamos)
+    table_prestamos(prestamos, data)
 
     return book
 
