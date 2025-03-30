@@ -85,9 +85,9 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 {% if side_code == 400 %}
-                                <a href="{% url 'catalago_View' %}" class="nav-link active">
+                                <a href="{% url 'catalago' %}" class="nav-link active">
                                     {% else %}
-                                    <a href="{% url 'catalago_View' %}" class="nav-link">
+                                    <a href="{% url 'catalago' %}" class="nav-link">
                                         {% endif %}
                                         <i class="fas fa-book"></i>
                                         <p>Catálogo</p>
@@ -95,9 +95,9 @@
                             </li>
                             <li class="nav-item">
                                 {% if side_code == 403 %}
-                                <a href="{% url 'get_book_for_person' %}" class="nav-link active">
+                                <a href="{% url 'prestamos_usuario' %}" class="nav-link active">
                                     {% else %}
-                                    <a href="{% url 'get_book_for_person' %}" class="nav-link">
+                                    <a href="{% url 'prestamos_usuario' %}" class="nav-link">
                                         {% endif %}
                                         <i class="fas fa-list-ul"></i>
                                         <p>Préstamos solicitados</p>

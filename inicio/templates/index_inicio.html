@@ -36,7 +36,7 @@
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ data.total_book }}</h3>
-                            <p>Libros totales en existencia</p>
+                            <p>Ejemplares totales en existencia</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-boxes"></i>
@@ -49,7 +49,7 @@
                     <div class="small-box bg-success">
                         <div class="inner">
                             <h3>{{ data.book_prestados_t }}</h3>
-                            <p>Libros prestados en el mes</p>
+                            <p>Titulos prestados en el mes</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-calendar-alt"></i>
@@ -62,7 +62,7 @@
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3>{{ data.book_movimiento }}</h3>
-                            <p>Libros en movimiento</p>
+                            <p>Titulos en movimiento</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-spinner"></i>
@@ -94,7 +94,7 @@
                             title="{{ ctrl.fullname }}" style="cursor: pointer;">{{ctrl.persona}}</td>
                             <td class="text-center">{{ctrl.reporte}}</td>
                             <td class="text-center">{{ctrl.carrera}}</td>
-                            <td class="text-center">{{ctrl.fecha_consulta}}</td>
+                            <td class="text-center">{{ctrl.fecha_consulta|date:"d-m-Y"}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -111,7 +111,7 @@
                 </div>
                 <div class="col-xl-4">
                     <figure class="highcharts-figure" id="chartColum" data-libros="{{ data.cant_libros }}"
-                        data-discos="{{ data.cant_discos }}">
+                        data-discos="{{ data.cant_discos }}" data-revistas="{{ data.cant_revistas }}">
                         <div id="container_colum"></div>
                     </figure>
                 </div>

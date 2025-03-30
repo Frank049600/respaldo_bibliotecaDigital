@@ -1,7 +1,8 @@
 $(document).ready(function() {
     // Llama función para DataTable
     datatable('catalogoTable');
-    datatable('prestamoTable');
+    datatable('prestamoTable', 6);
+    datatable('prestamoTableAll', 8);
     
     //Buscar matricula
     $('#modal_catalogo').on('shown.bs.modal', function () {
@@ -45,8 +46,9 @@ $(document).ready(function() {
         $('input[name=colocacion]').val(data.colocacion);
     });
     
+
     // Función para el borrado de elementos
-    $('#prestamoTable').on('click', 'tbody td a#delivered', function (e) {
+    $('#prestamoTableAll').on('click', 'tbody td a#delivered', function (e) {
         let data = $(this).closest('#info_book').data();
         let cve_prestamo = data['cve_prestamo'];
         // let entrega = data['entrega'].trim().toLowerCase();
@@ -66,7 +68,7 @@ $(document).ready(function() {
     });
     
     // Función para renovar el prestamo del libro
-    $('#prestamoTable').on('click', 'tbody td a#renew_again', function (e) {
+    $('#prestamoTableAll').on('click', 'tbody td a#renew_again', function (e) {
         let data = $(this).closest('#info_book').data();
         let cve_prestamo = data['cve_prestamo'];
         let cantidad_m = data['cantidad_m'];

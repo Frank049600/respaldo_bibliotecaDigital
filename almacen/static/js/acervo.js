@@ -1,6 +1,6 @@
 $(document).ready(function () {
     // Llama función para DataTable
-    datatable('acervoTable');
+    datatable('acervoTable', 4, 'asc');
 
     // Se estructura la información para el modal
     function struct_modal(title, autor, editorial, cantidad, colocacion, edicion, año, type_adqui, state, formato) {
@@ -16,7 +16,8 @@ $(document).ready(function () {
             'book': 'Libro',
             'disc': 'Disco',
             'Libro': 'Libro',
-            'Disco': 'Disco'
+            'Disco': 'Disco',
+            'Revista': 'Revista'
         };
         formato = match[formato] != 'undefined' ? match[formato] : formato;
         state = match[state] != 'undefined' ? match[state] : state;
@@ -204,6 +205,7 @@ $(document).ready(function () {
         decode_val = {
             'Libro': 'Libro',
             'Disco': 'Disco',
+            'Revista': 'Revista',
             'book': 'Libro',
             'disc': 'Disco',
             'Excelente': 'Excelente',

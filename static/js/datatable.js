@@ -1,4 +1,4 @@
-const datatable = (name_table) => {
+const datatable = (name_table, campo_order = 0, forma = 'desc') => {
     new DataTable('#' + name_table, {
         layout: {
             bottomEnd: {
@@ -78,6 +78,6 @@ const datatable = (name_table) => {
             },
             "infoEmpty": "No hay datos para mostrar"
         },
-        "order": [[ "desc" ]]
+        "order": [[campo_order, forma ]]
     })
 }

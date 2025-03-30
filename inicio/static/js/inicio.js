@@ -1,6 +1,6 @@
 $(document).ready( function () {    
     // Llama función para DataTable
-    datatable('tbl_prestamo_es');
+    datatable('tbl_prestamo_es', 3);
 
     // Creación de gráfica de pastel
     // Se obtienen los estados registrados
@@ -86,18 +86,25 @@ $(document).ready( function () {
     // Creación de gráfica de barras
     let libros = $('#chartColum').data('libros');
     let discos = $('#chartColum').data('discos');
-    if (libros != 'undefined' && discos != 'undefined') {
+    let revistas = $('#chartColum').data('revistas');
+    if (libros != 'undefined' && discos != 'undefined' && revistas != 'undefined') {
         Highcharts.chart('container_colum', {
             chart: {
                 type: 'column'
             },
             title: {
                 align: 'left',
-                text: 'Tipo de ejemplar'
+                text: 'Cantidad de titulos',
+                style: {
+                    textDecoration: 'none'
+                }
             },
             subtitle: {
                 align: 'left',
-                text: 'Se muestra la cantidad de libros con respecto a la cantidad de discos registrados'
+                text: 'Cantidad de libros, revistas y discos registrados',
+                style: {
+                    textDecoration: 'none'
+                }
             },
             accessibility: {
                 announceNewData: {
@@ -105,15 +112,28 @@ $(document).ready( function () {
                 }
             },
             xAxis: {
-                type: 'category'
+                type: 'category',
+                labels: {
+                    style: {
+                        textDecoration: 'none'
+                    }
+                }
             },
             yAxis: {
                 title: {
                     text: 'Total de elementos'
+                },
+                labels: {
+                    style: {
+                        textDecoration: 'none'  // Evita subrayado en etiquetas del eje Y
+                    }
                 }
             },
             legend: {
-                enabled: false
+                enabled: false,
+                itemStyle: {
+                    textDecoration: 'none'
+                }
             },
             plotOptions: {
                 series: {
@@ -148,6 +168,12 @@ $(document).ready( function () {
                             y: discos,
                             drilldown: 'Discos',
                             color: '#007bff'
+                        },
+                        {
+                            name: 'Revistas',
+                            y: revistas,
+                            drilldown: 'Revistas',
+                            color: '#1300ff'
                         }
                     ]
                 }
@@ -256,7 +282,6 @@ function reportMensual() {
     }).then(function (result) {
         if (result.isConfirmed) {
             // Envía la colocación del registro a eliminar
-            // location.href = '/report/'
             location.href = '/report/' + result.value
         }
     })

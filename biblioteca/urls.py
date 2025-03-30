@@ -9,7 +9,7 @@ from login.views import logoutUser
 from estadias.views import estadias_registro
 from estadias.views import view_report, servir_pdf, get_alumno, insert_consult
 from usuario.views import login_view
-from catalogo.views import catalago_View, prestamos_View, prestamo_registro, cargar_portada, search_book, edit_portada, view_book, book_delivered, get_book_for_person, renew_again, cant_for_search
+from catalogo.views import catalago, prestamos_View, prestamo_registro, cargar_portada, search_book, edit_portada, view_book, book_delivered, prestamos_usuario, renew_again, cant_for_search
 from catalogo.views import get_alumno as get_personas_p
 
 from django.conf import settings
@@ -39,7 +39,7 @@ urlpatterns = [
     # aplicación de sesión
     path('session-security/', include('session_security.urls')),
     # Aplicación de catalogo
-    path('catalago_View', login_required(catalago_View), name='catalago_View'),
+    path('catalago', login_required(catalago), name='catalago'),
     path('prestamo_registro/', login_required(prestamo_registro), name='prestamo_registro'),
     path('prestamos_View/', login_required(prestamos_View), name='prestamos_View'),
     path('cargar_portada/', login_required(cargar_portada), name='cargar_portada'),
@@ -49,7 +49,7 @@ urlpatterns = [
     path('book_delivered/<str:cve>/<str:entrega>', login_required(book_delivered), name='book_delivered'),
     path('renew_again/<str:cve>/<int:cant>/<str:entrega>', login_required(renew_again), name='renew_again'),
     path('cant_for_search/', login_required(cant_for_search), name='cant_for_search'),
-    path('get_book_for_person/', login_required(get_book_for_person), name='get_book_for_person'),
+    path('prestamos_usuario/', login_required(prestamos_usuario), name='prestamos_usuario'),
     path('get_personas_p/', login_required(get_personas_p), name='get_personas_p'),
     # Generación de reporte xlsx
     path('report/<int:periodo>', login_required(report), name='report'),

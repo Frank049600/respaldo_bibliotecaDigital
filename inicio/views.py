@@ -39,6 +39,7 @@ def index_inicio(request):
             "side_code": side_code,
             "cant_libros":totals['format_libro'],
             "cant_discos": totals['format_disco'],
+            "cant_revistas": totals['format_revista'],
             "name_cole": value_adqui['name_cole'],
             "value_adqui": value_adqui['value_adqui'],
             "ctrl_view": ctrl_view
@@ -56,15 +57,19 @@ def cont_books(datos, type):
     if type == 't':
         format_libro = 0
         format_disco = 0
+        format_revista = 0
         for cant in datos:
             if cant.formato == 'book' or cant.formato == 'Libro':
                 format_libro += 1
             if cant.formato == 'disc' or cant.formato == 'Disco':
                 format_disco += 1
+            if cant.formato == 'Revista':
+                format_revista += 1
             total_book += cant.cant
         totals = {
             "format_libro": format_libro,
             "format_disco": format_disco,
+            "format_revista": format_revista,
             "total_book": total_book
         }
     if type == 'p':
@@ -81,7 +86,7 @@ def cont_books(datos, type):
         for p in prestamos:
             conteo_m += p.cantidad_m
             expl = str(p.fechaP).split(' ')
-            print(expl[0])
+            # print(expl[0])
             if expl[0] >= fech_ini and expl[0] <= fech_fin:
                 conteo_i += p.cantidad_i
             # total_book += 1
@@ -138,6 +143,7 @@ def ctrl_view_report(info):
     data = {}
     data_all = []
 
+    # Obtiene el periodo de consulta
     for ctrl in info:
         cve_persona = Usuario.objects.get(login=ctrl.matricula)
         persona = Persona.objects.get(cve_persona=cve_persona.cve_persona)
@@ -152,7 +158,20 @@ def ctrl_view_report(info):
     
     return data_all
 
-def report(request, periodo):
+def periodo_consulta(periodo):
+    """Se obtiene el ciclo y el rango de fechas para consulta
+
+    Args:
+        periodo (integer): Bandera para indicar el mes a consultar 
+        1 = mes actual
+        2 = mes anterior
+
+    Returns:
+        array: Retorna arreglo
+        - Fecha inicial
+        - Fecha final
+        - Ciclo
+    """
     # Arreglo para obtención nombre de mes
     format = {
         "01": "ENERO",
@@ -172,19 +191,47 @@ def report(request, periodo):
     year = date.strftime('%Y')
     month = date.strftime('%m')
     # Define mes de consulta
-    resta = 1 if periodo == 1 else 0
-    calc = int(month) - resta
+    # resta = 1 if periodo == 1 else 0
+    calc = int(month) - periodo
     _, num_days = calendar.monthrange(int(year), int(calc))
+
+    calc_mes = f"0{calc}" if len(str(calc)) == 1 else calc
+
     if len(str(calc)) == 1:
         ciclo = format[f"0{calc}"]
     else:
         ciclo = format[calc]
+
+    return {
+        'fech_ini': f"{year}-{calc_mes}-01",
+        'fech_fin': f"{year}-{calc_mes}-{num_days}",
+        'ciclo': ciclo
+    }
+
+def report(request, periodo):
+    """Recopila datos para la generación del reporte mensual
+
+    Args:
+        request (object): Información sobre la solicitud HTTP entrante
+        periodo (integer): Bandera para indicar el mes a consultar 
+        1 = mes actual
+        2 = mes anterior
+
+    Returns:
+        instancia: Retorna instancia de la creación del reporte, para que pueda ser descargado.
+    """
+    dato_periodo = periodo_consulta(periodo)
+    fech_ini = dato_periodo['fech_ini']
+    fech_fin = dato_periodo['fech_fin']
+    ciclo = dato_periodo['ciclo']
     # Obtiene información del acervo
     libros = acervo_model.objects.all()
     cantidad_libro = {}
     volumen_libro = {}
     cantidad_disco = {}
     volumen_disco = {}
+    volumen_revista = {}
+    cantidad_revista = {}
     conteo_ejemplares = []
     for libro in libros:
         formato = libro.formato
@@ -220,19 +267,21 @@ def report(request, periodo):
             else:
                 volumen_disco[ejemplar] = libro.cant
                 cantidad_disco[ejemplar] = 1
-    # Calcula adquisiciones por fecha
-    # fecha_inicio = datetime.date()
-    # print(fecha_inicio)
-    # registros_filtrados = list(filter(lambda r: fecha_inicio <= datetime.strptime(r["fecha"], "%Y-%m-%d") <= fecha_fin, libros))
-    # return False
-    # Manejor de adquisiciones de ejemplares
-    # Obtiene el número del mes anterior
+        if formato == 'Revista':
+            if len(volumen_revista) != 0:
+                if ejemplar in volumen_revista:
+                    # c_anterior = volumen_group[ejemplar]
+                    # suma = c_anterior + libro.cant
+                    volumen_revista[ejemplar] = volumen_revista[ejemplar] + libro.cant
+                    cantidad_revista[ejemplar] = cantidad_revista[ejemplar] + 1
+                else:
+                    volumen_revista[ejemplar] = libro.cant
+                    cantidad_revista[ejemplar] = 1
+            else:
+                volumen_revista[ejemplar] = libro.cant
+                cantidad_revista[ejemplar] = 1
     # Obtiene todas las carreras activas
     carreras = Carrera.objects.all()
-    # Se le formatea a 2 número si es necesario
-    calc_mes = f"0{calc}" if len(str(calc)) == 1 else calc
-    fech_ini = f"{year}-{calc_mes}-01"
-    fech_fin = f"{year}-{calc_mes}-{num_days}"
     conc_adquisicion = {}
     conc_adquisicion['fecha_inicial'] = fech_ini
     conc_adquisicion['fecha_final'] = fech_fin
@@ -242,6 +291,8 @@ def report(request, periodo):
     adqui_cant_libro = {}
     adqui_vol_disco = {}
     adqui_cant_disco = {}
+    adqui_vol_revista = {}
+    adqui_cant_revista = {}
     for carrera in conteo_ejemplares:
         for libro in libros:
             if str(libro.fecharegistro) >= fech_ini and str(libro.fecharegistro) <= fech_fin:
@@ -262,11 +313,20 @@ def report(request, periodo):
                         else: 
                             adqui_vol_disco[carrera] = libro.cant
                             adqui_cant_disco[carrera] = 1
+                    if libro.formato == 'Revista':
+                        if carrera in adqui_cant_revista:
+                            adqui_vol_revista[carrera] = adqui_vol_revista[carrera] + libro.cant
+                            adqui_cant_revista[carrera] = adqui_cant_revista[carrera] + 1
+                        else: 
+                            adqui_vol_revista[carrera] = libro.cant
+                            adqui_cant_revista[carrera] = 1
     adquisiciones = {
         "volumen_libros": adqui_vol_libro,
         "cantidad_libros": adqui_cant_libro,
         "volumen_discos": adqui_vol_disco,
-        "cantidad_discos": adqui_cant_disco
+        "cantidad_discos": adqui_cant_disco,
+        "volumen_revistas": adqui_vol_revista,
+        "cantidad_revistas": adqui_cant_revista
     }
     # Obtiene información de los reportes de estadías
     reportes = model_estadias.objects.all()
@@ -366,6 +426,8 @@ def report(request, periodo):
         'volumenes_por_libro': volumen_libro,
         'cantidad_disco': cantidad_disco,
         'volumenes_por_disco': volumen_disco,
+        'cantidad_revista': cantidad_revista,
+        'volumenes_por_revista': volumen_revista,
         'conteo_ejemplares': conteo_ejemplares,
         'conc_carreras': conc_carreras,
         'estadias_reportes': estadias_reportes,
