@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from almacen.models import acervo_model
 from estadias.models import register_view, model_estadias
 from sito.models import Persona, Usuario, Carrera
@@ -157,6 +158,60 @@ def ctrl_view_report(info):
         data_all.append(data)
     
     return data_all
+
+def get_periodo(request):
+    """Se obtiene el ciclo y el rango de fechas para consulta GET por ajax
+
+    Args:
+        periodo (integer): Bandera para indicar el mes a consultar 
+        1 = mes actual
+        2 = mes anterior
+
+    Returns:
+        array: Retorna arreglo
+        - Fecha inicial
+        - Fecha final
+        - Ciclo
+    """
+    periodo = request.GET.get('periodo')
+    periodo = int(periodo)
+    # Arreglo para obtención nombre de mes
+    format = {
+        "01": "ENERO",
+        "02": "FEBRERO",
+        "03": "MARZO",
+        "04": "ABRIL",
+        "05": "MAYO",
+        "06": "JUNIO",
+        "07": "JULIO",
+        "08": "AGOSTO",
+        "09": "SEPTIEMBRE",
+        "10": "OCTUBRE",
+        "11": "NOVIEMBRE",
+        "12": "DICIEMBRE"
+    }
+    date = datetime.now()
+    year = date.strftime('%Y')
+    month = date.strftime('%m')
+    # Define mes de consulta
+    # resta = 1 if periodo == 1 else 0
+    calc = int(month) - periodo
+    _, num_days = calendar.monthrange(int(year), int(calc))
+
+    calc_mes = f"0{calc}" if len(str(calc)) == 1 else calc
+
+    if len(str(calc)) == 1:
+        ciclo = format[f"0{calc}"]
+    else:
+        ciclo = format[calc]
+
+    data = {
+        'fech_ini': f"{year}-{calc_mes}-01",
+        'fech_fin': f"{year}-{calc_mes}-{num_days}",
+        'ciclo': ciclo
+    }
+
+    return JsonResponse(data, safe=False)
 
 def periodo_consulta(periodo):
     """Se obtiene el ciclo y el rango de fechas para consulta

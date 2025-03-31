@@ -78,7 +78,15 @@
                 </div>
             </div>
             <div class="table-responsive bg-white p-2" id="table_views_report">
-                <table id="tbl_prestamo_es" class="cell-border stripe" style="width:100%">
+                <div class="justify-content-left col-3 d-flex">
+                    <span class="me-1" >Periodo</span>
+                    <select class="form-select w-auto" id="periodo_opt">
+                        <option value="all">Todo</option>
+                        <option value="0">Este mes</option>
+                        <option value="1">Mes anterior</option>
+                    </select>
+                </div>
+                <table id="tbl_prestamo_es" class="table table-striped" style="width:100%;">
                     <thead>
                         <tr>
                             <th class="text-center">Persona quien consulta</th>

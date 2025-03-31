@@ -31,7 +31,15 @@
           </div>
         </div>
         <div class="table-responsive bg-white p-2">
-          <table id="prestamoTableAll" class="cell-border stripe" style="width:100%">
+          <div class="justify-content-left col-3 d-flex">
+            <span class="me-1" >Periodo</span>
+            <select class="form-select w-auto" id="periodo_opt">
+                <option value="all">Todo</option>
+                <option value="0">Este mes</option>
+                <option value="1">Mes anterior</option>
+            </select>
+          </div>
+          <table id="prestamoTableAll" class="table table-striped" style="width:100%">
             <thead>
               <tr>
                 <th class="text-center">Clave</th>
@@ -39,11 +47,12 @@
                 <th class="text-center">Carrera y Grupo</th>
                 <th class="text-center">Colocación</th>
                 <th class="text-center">Cantidad inicial</th>
-                <th class="text-center">Cantidad en proceso</th>
+                <th class="text-center">Cantidad en movimiento</th>
                 <th class="text-center">Tipo de préstamo</th>
-                <th class="text-center">Días restantes de préstamo</th>
+                <th class="text-center">Días restantes</th>
                 <th class="text-center">Estado</th>
                 <th class="text-center">Acciones</th>
+                <th style="display: none;"></th>
               </tr>
             </thead>
             <tbody>
@@ -85,16 +94,16 @@
                   {% endif %}
                 </td>
                 <td>
-                {% if p.entrega == 'Proceso' %}
-                <span class="text-bold text-info" data-bs-toggle="tooltip" data-bs-placement="top"
-                  title="En proceso de ser recogido">En proceso</span>
-                {% elif p.entrega == 'Entregado' %}
-                <span class="text-bold text-warning" data-bs-toggle="tooltip" data-bs-placement="top"
-                  title="Entregado: {{p.fechaE}}">Entregado</span>
-                  {% elif p.entrega == 'Devuelto' %}
-                <span class="text-bold text-success" data-bs-toggle="tooltip" data-bs-placement="top"
-                  title="Devuelto: {{p.fechaD}}">Devuelto</span>
-                {% endif %}
+                  {% if p.entrega == 'Proceso' %}
+                  <span class="text-bold text-info" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="En proceso de ser recogido">En proceso</span>
+                  {% elif p.entrega == 'Entregado' %}
+                  <span class="text-bold text-warning" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Entregado: {{p.fechaE}}">Entregado</span>
+                    {% elif p.entrega == 'Devuelto' %}
+                  <span class="text-bold text-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Devuelto: {{p.fechaD}}">Devuelto</span>
+                  {% endif %}
                 </td>
                 <td class="text-center">
                   <a id="delivered" type="button"><i class="fas fa-truck-loading text-info" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -104,6 +113,7 @@
                     title="Renovar préstamo"></i>
                   </a>
                 </td>
+                <td style="display: none;">{{p.fechaP|date:"d-m-Y"}}</td>
               </tr>
               {% endfor %}
             </tbody>

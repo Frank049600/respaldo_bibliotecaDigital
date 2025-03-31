@@ -582,6 +582,12 @@ def table_reporte_estadias(sheet, data):
         sheet[f"{c}{celda + 1}"].alignment = centrado
 
 def table_prestamos(sheet, data):
+    """Crea tabla de prestamos
+
+    Args:
+        sheet (object): Instancia de Workbook
+        data (array): Arreglo con la información formateada.
+    """
         # configuraciones reusables reusables
     centrado = Alignment(horizontal='center', vertical='center')
     # Agrega caracteristicas grupales

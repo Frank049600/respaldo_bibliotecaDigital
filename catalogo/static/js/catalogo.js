@@ -1,8 +1,8 @@
 $(document).ready(function() {
     // Llama función para DataTable
-    datatable('catalogoTable');
-    datatable('prestamoTable', 6);
-    datatable('prestamoTableAll', 8);
+    datatable('catalogoTable', 0, 'asc');
+    datatable('prestamoTable');
+    datatable('prestamoTableAll', 8, 'desc', 10);
     
     //Buscar matricula
     $('#modal_catalogo').on('shown.bs.modal', function () {
@@ -15,7 +15,11 @@ $(document).ready(function() {
                 data: { "matricula": matricula },
                 type: 'GET',
                 success: function (response) {
-                    let nombre_completo = response['nombre'] + ' ' + response['apellido_paterno'] + ' ' + response['apellido_materno'];
+                    let nombre_completo = response['nombre'] 
+                                        + ' ' 
+                                        + response['apellido_paterno'] 
+                                        + ' ' 
+                                        + response['apellido_materno'];
                     let carrera = response['nombre_grupo'];
                     $('input[name=matricula').val(matricula);
                     $('input[name=nom_alumno]').val(nombre_completo);

@@ -1,6 +1,6 @@
 $(document).ready( function () {    
     // Llama función para DataTable
-    datatable('tbl_prestamo_es', 3);
+    datatable('tbl_prestamo_es', 3, 'desc', 3);
 
     // Creación de gráfica de pastel
     // Se obtienen los estados registrados

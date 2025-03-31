@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from almacen.views import index_acervo as acervo
 from almacen.views import acervo_registro, delete_acervo, edit_register, edit_acervo, temp_formato_add
-from inicio.views import index_inicio as inicio, report
+from inicio.views import index_inicio, report, get_periodo
 from estadias.views import index_proyectos as proyectos
 from django.contrib.auth.decorators import login_required
 from login.views import logoutUser
@@ -19,7 +19,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name = 'panel'),
     path('acervo/', login_required(acervo), name = 'acervo'),
     path('temp_formato_add/', login_required(temp_formato_add), name = 'temp_formato_add'),
-    path('', login_required(inicio), name = 'inicio'),
+    path('', login_required(index_inicio), name = 'inicio'),
     # path('accounts/login/', Login.as_view(), name = 'login'),
     path('accounts/login/', login_view, name = 'login'),
     path('logout/', login_required(logoutUser), name = 'logout'),
@@ -53,6 +53,8 @@ urlpatterns = [
     path('get_personas_p/', login_required(get_personas_p), name='get_personas_p'),
     # Generación de reporte xlsx
     path('report/<int:periodo>', login_required(report), name='report'),
+    # Consulta de periodo por ajax
+    path('get_periodo/', login_required(get_periodo), name='get_periodo'),
 ]
 
 urlpatterns += [
