@@ -27,7 +27,7 @@ urlpatterns = [
     path('proyectos/',login_required(proyectos),name='proyectos'),
     # Rutas app Acervo
     path('acervo_registro/', login_required(acervo_registro), name='acervo_registro'),
-    path('delete_acervo/<col>', login_required(delete_acervo), name='delete_acervo'),
+    path('delete_acervo/<str:col>', login_required(delete_acervo), name='delete_acervo'),
     path('edit_register/<col>', login_required(edit_register), name='edit_register'),
     path('edit_acervo/', login_required(edit_acervo), name='edit_acervo'),
     # Rutas app estadías

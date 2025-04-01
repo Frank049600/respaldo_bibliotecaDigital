@@ -67,11 +67,11 @@ def acervo_registro(request):
         messages.add_message(request, messages.ERROR, '¡Algo salio mal!')
         return redirect('acervo')
 
-@groups_required('Administrador')
+# @groups_required('Administrador')
 def delete_acervo(request, col):
         acervo_delete = acervo_model.objects.filter(colocacion=col).first()
         acervo_delete.delete()
-        messages.success(request, 'Registro Eliminado')
+        messages.add_message(request, messages.SUCCESS, 'Registro eliminado')
         return redirect(to="acervo")
 
 # @groups_required('Administrador')

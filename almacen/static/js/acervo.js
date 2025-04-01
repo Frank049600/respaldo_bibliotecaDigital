@@ -235,6 +235,7 @@ $(document).ready(function () {
         modal_inputs.modal('show')
         $('#acervo_add #btnModalSend').attr('style', 'display: none')
         $('#acervo_add #btnModalUpdate').removeAttr('style', 'display: none;')
+        $('#acervo_add #btnModalDelete').removeAttr('style', 'display: none;')
         $('#acervo_add #title_modal').text('Editar ejemplar')
         // Al cerrar el modal se limpian todos los campos.
         modal_inputs.on('hidden.bs.modal', function () {
@@ -248,6 +249,7 @@ $(document).ready(function () {
                 //$('#tbl_addBook #' + input_id[9])[0].value = 'EXC'
                 $('select[name="' + input_id[9] + '"]').val('Excelente')
                 $('#acervo_add #btnModalUpdate').attr('style', 'display: none;')
+                $('#acervo_add #btnModalDelete').attr('style', 'display: none;')
                 $('#acervo_add #btnModalSend').removeAttr('style', 'display: none;')
                 $('#acervo_add #tbl_addBook').attr('action', '/acervo_registro/')
                 $('#acervo_add #title_modal').text('Nueva adquisición')
@@ -260,6 +262,16 @@ $(document).ready(function () {
             event.preventDefault();
             process('¡Debes ingresar una cantidad mayor a 0!');
         };
+    });
+
+    // Función para el borrado de registros
+    $('#btnModalDelete').on('click', function () {
+        let colocacion = $('input[name="colocacion"]').val();
+        let title = 'Eliminar';
+        let text = 'El registro no se podrá recuperar';
+        let icon = 'question';
+        let rute = '/delete_acervo/';
+        register_deleteSwal(title, colocacion, text, icon, rute)
     });
 
     // Función para realizar salto de input con Enter
