@@ -158,7 +158,7 @@ def table_acervo(sheet, data):
     # Asigna número de volumenes
     sheet.column_dimensions['D'].width = 20
     sheet['D13'].border = get_borders('all')
-    sheet['D13'] = 'No. DE VOLUMENES'
+    sheet['D13'] = 'No. VOLUMENES'
     sheet['D13'].alignment = centrado
     cont_cell = 14
     totalizador_lib2 = 0
@@ -199,7 +199,7 @@ def table_acervo(sheet, data):
     # Asigna número de volumenes
     sheet.column_dimensions['F'].width = 20
     sheet['F13'].border = get_borders('all')
-    sheet['F13'] = 'No. DE VOLUMENES'
+    sheet['F13'] = 'No. VOLUMENES'
     sheet['F13'].alignment = centrado
 
     cont_cell = 14
@@ -240,7 +240,7 @@ def table_acervo(sheet, data):
     # Asigna número de volumenes
     sheet.column_dimensions['H'].width = 20
     sheet['H13'].border = get_borders('all')
-    sheet['H13'] = 'No. DE VOLUMENES'
+    sheet['H13'] = 'No. VOLUMENES'
     sheet['H13'].alignment = centrado
 
     cont_cell = 14
